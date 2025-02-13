@@ -5,10 +5,13 @@ import com.example.demo.entity.StudentClass;
 import com.example.demo.repository.StudentRepository;
 import com.example.demo.repository.ClassRepository;
 import com.example.demo.service.StudentService;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class StudentServiceImpl implements StudentService {
@@ -28,8 +31,9 @@ public class StudentServiceImpl implements StudentService {
         }
     }
 
-
-    @Override
+@PersistenceContext
+private EntityManager entityManager;
+    @Transactional
     public Student saveUser(Student student) {
         // Kiểm tra tính hợp lệ của classId và addressId
         if (student.getStudentClass() == null || student.getStudentClass().getId() == 0) {
@@ -39,9 +43,19 @@ public class StudentServiceImpl implements StudentService {
             throw new RuntimeException("Lỗi: addressId không hợp lệ!");
         }
 
+        // Kiểm tra nếu Address và StudentClass đã bị detached, nếu có, merge lại chúng
+        if (student.getStudentClass().getId() > 0) {
+            student.setStudentClass(classRepository.getOne(student.getStudentClass().getId())); // Thực hiện lazy loading
+        }
+
+        if (student.getAddress().getId() > 0) {
+            student.setAddress(entityManager.merge(student.getAddress())); // Merge lại Address nếu bị detached
+        }
+
         // Lưu sinh viên
         return studentRepository.save(student);
     }
+
 
     @Override
     public void deleteUser(Integer id) {

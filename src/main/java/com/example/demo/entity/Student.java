@@ -30,4 +30,5 @@ public class Student {
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
     private Address address;
+
 }

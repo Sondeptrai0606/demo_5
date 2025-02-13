@@ -41,10 +41,16 @@ public class StudentController {
             return ResponseEntity.badRequest().body("Lỗi: addressId không hợp lệ!");
         }
 
-        // Lưu sinh viên
-        Student savedStudent = studentService.saveUser(student);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedStudent);
+        try {
+            // Lưu sinh viên
+            Student savedStudent = studentService.saveUser(student);
+            return ResponseEntity.status(HttpStatus.CREATED).body(savedStudent);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi khi lưu sinh viên: " + e.getMessage());
+        }
     }
+
+
 
     // Cập nhật thông tin sinh viên
     @PutMapping("/update/{id}")
