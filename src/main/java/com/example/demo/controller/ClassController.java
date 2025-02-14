@@ -30,14 +30,17 @@ public class ClassController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<?> createMultipleClasses(@RequestBody StudentClass classes) {
-//        if (classes == null || classes.isEmpty()) {
-//            return ResponseEntity.badRequest().body("Not empty!");
-//        }
+    public ResponseEntity<?> createClass(@RequestBody StudentClass studentClass) {
+        // Kiểm tra className không được để trống
+        if (studentClass.getClassName() == null || studentClass.getClassName().trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("Lỗi: className không được để trống!");
+        }
 
-        StudentClass savedClasses = classService.saveClasses(classes);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedClasses);
+        // Lưu lớp học vào database
+        StudentClass savedClass = classService.saveClass(studentClass);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedClass);
     }
+
 
 
 

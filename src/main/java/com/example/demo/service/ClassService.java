@@ -9,6 +9,6 @@ public interface ClassService {
     Optional<StudentClass> getClassById(Integer id);
     StudentClass saveClass(StudentClass classObj);
     void deleteClass(Integer id);
-    StudentClass saveClasses(StudentClass classes);
 
+    StudentClass saveClasses(StudentClass classes);
 }

@@ -1,5 +1,6 @@
 package com.example.demo.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -11,21 +12,21 @@ import java.util.List;
 @Entity
 @Table(name = "classes")
 public class StudentClass {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(nullable = false,name = "Nameofclass")  // Đảm bảo không để trống className
-    private String className;
+    private String className; // Tên lớp học
+    private int totalStudents = 0; // Số lượng sinh viên trong lớp
 
-    private int totalStudents = 0; // Mặc định là 0 tránh lỗi null
-
+    // Quan hệ 1-N: Một lớp có nhiều sinh viên
     @OneToMany(mappedBy = "studentClass", cascade = CascadeType.ALL, orphanRemoval = true)
-    @EqualsAndHashCode.Exclude // không sử dụng trường này trong equals và hashcode
-    @ToString.Exclude
+    @JsonManagedReference // Tránh lỗi vòng lặp khi serialize JSON
     private List<Student> students;
 
-    public void updateTotalStudents() {
-        this.totalStudents = (students != null) ? students.size() : 0;
+    public void setTotalStudents(int totalStudents) {
+        this.totalStudents = students != null ? totalStudents : 0;
     }
+
 }

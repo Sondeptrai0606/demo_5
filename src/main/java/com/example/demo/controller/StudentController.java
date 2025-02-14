@@ -2,12 +2,13 @@ package com.example.demo.controller;
 
 import com.example.demo.entity.Student;
 import com.example.demo.service.StudentService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
+
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/students")
@@ -16,59 +17,43 @@ public class StudentController {
     @Autowired
     private StudentService studentService;
 
-    // Lấy danh sách tất cả sinh viên
+    // API lấy danh sách sinh viên
     @GetMapping
     public ResponseEntity<List<Student>> getAllStudents() {
-        List<Student> students = studentService.getAllStudent();
-        return new ResponseEntity<>(students, HttpStatus.OK);
+        return ResponseEntity.ok(studentService.getAllStudents());
     }
 
-    // Lấy sinh viên theo ID
+    // API lấy thông tin sinh viên theo ID
     @GetMapping("/{id}")
     public ResponseEntity<Student> getStudentById(@PathVariable Integer id) {
-        return studentService.findStudentById(id)
-                .map(student -> new ResponseEntity<>(student, HttpStatus.OK))
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Student not found"));
+        Optional<Student> studentOpt = studentService.findStudentById(id);
+        return studentOpt.map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // Thêm sinh viên mới
+    // API thêm sinh viên mới
     @PostMapping("/add")
-    public ResponseEntity<?> createStudent(@RequestBody Student student) {
-        if (student.getStudentClass() == null || student.getStudentClass().getId() == 0) {
-            return ResponseEntity.badRequest().body("Lỗi: classId không hợp lệ!");
-        }
-        if (student.getAddress() == null || student.getAddress().getId() == 0) {
-            return ResponseEntity.badRequest().body("Lỗi: addressId không hợp lệ!");
-        }
-
-        try {
-            // Lưu sinh viên
-            Student savedStudent = studentService.saveUser(student);
-            return ResponseEntity.status(HttpStatus.CREATED).body(savedStudent);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Lỗi khi lưu sinh viên: " + e.getMessage());
-        }
+    public ResponseEntity<Student> createStudent(@RequestBody @Valid Student student) {
+        return ResponseEntity.ok(studentService.saveStudent(student));
     }
 
-
-
-    // Cập nhật thông tin sinh viên
+    // API cập nhật sinh viên
     @PutMapping("/update/{id}")
     public ResponseEntity<Student> updateStudent(@PathVariable Integer id, @RequestBody Student studentDetails) {
-        return studentService.findStudentById(id)
-                .map(student -> {
-                    student.setName(studentDetails.getName());
-                    student.setAge(studentDetails.getAge());
-                    studentService.saveUser(student);
-                    return new ResponseEntity<>(student, HttpStatus.OK);
-                })
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Student not found"));
+        Optional<Student> studentOpt = studentService.findStudentById(id);
+        if (studentOpt.isPresent()) {
+            Student student = studentOpt.get();
+            student.setName(studentDetails.getName());
+            student.setAge(studentDetails.getAge());
+            return ResponseEntity.ok(studentService.saveStudent(student));
+        }
+        return ResponseEntity.notFound().build();
     }
 
-    // Xóa sinh viên theo ID
+    // API xóa sinh viên
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<String> deleteStudent(@PathVariable Integer id) {
-        studentService.deleteUser(id);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Deleted student with ID: " + id);
+        studentService.deleteStudent(id);
+        return ResponseEntity.ok("Deleted student with ID: " + id);
     }
 }
