@@ -4,6 +4,7 @@ import com.example.demo.entity.Address;
 import com.example.demo.repository.AddressRepository;
 import com.example.demo.service.AddressService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,6 +15,7 @@ public class AddressServiceImpl implements AddressService {
 
     @Autowired
     private AddressRepository addressRepository;
+
 
     @Override
     public List<Address> getAllAddresses() {
@@ -39,5 +41,10 @@ public class AddressServiceImpl implements AddressService {
     public List<Address> saveAllAddresses(List<Address> addresses) {
         return addressRepository.saveAll(addresses);
 
+    }
+
+    @Override
+    public List<Address> filterAddresses(Specification<Address> spec) {
+        return addressRepository.findAll(spec);
     }
 }

@@ -4,6 +4,7 @@ import com.example.demo.entity.StudentClass;
 import com.example.demo.repository.ClassRepository;
 import com.example.demo.service.ClassService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
@@ -13,6 +14,7 @@ public class ClassServiceImpl implements ClassService {
 
     @Autowired
     private ClassRepository classRepository;
+
 
     @Override
     public List<StudentClass> getAllClasses() {
@@ -37,6 +39,11 @@ public class ClassServiceImpl implements ClassService {
     @Override
     public StudentClass saveClasses(StudentClass classes) {
         return classRepository.save(classes);
+    }
+
+    @Override
+    public List<StudentClass> filterClasses(Specification<StudentClass> spec) {
+        return classRepository.findAll(spec);
     }
 
 //    @Override

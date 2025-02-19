@@ -1,6 +1,8 @@
 package com.example.demo.service;
 
 import com.example.demo.entity.Address;
+import org.springframework.data.jpa.domain.Specification;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -11,4 +13,6 @@ public interface AddressService {
     void deleteAddress(Integer id);
 
     List<Address> saveAllAddresses(List<Address> addresses);
+    List<Address> filterAddresses(Specification<Address> spec);
+
 }

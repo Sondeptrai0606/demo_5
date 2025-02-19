@@ -8,6 +8,7 @@ import com.example.demo.repository.ClassRepository;
 import com.example.demo.repository.StudentRepository;
 import com.example.demo.service.StudentService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +26,7 @@ public class StudentServiceImpl implements StudentService {
 
     @Autowired
     private AddressRepository addressRepository;
+
 
     @Override
     public List<Student> getAllStudents() {
@@ -101,4 +103,10 @@ public class StudentServiceImpl implements StudentService {
     public Optional<Student> findStudentById(Integer id) {
         return studentRepository.findById(id);
     }
+
+    @Override
+    public List<Student> filterStudents(Specification<Student> spec) {
+        return studentRepository.findAll(spec);
+    }
+
 }

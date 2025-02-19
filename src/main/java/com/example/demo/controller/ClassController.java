@@ -3,6 +3,7 @@ package com.example.demo.controller;
 import com.example.demo.entity.StudentClass;
 import com.example.demo.service.ClassService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -41,7 +42,21 @@ public class ClassController {
         return ResponseEntity.status(HttpStatus.CREATED).body(savedClass);
     }
 
-
+    @GetMapping("/filter")
+    public ResponseEntity<List<StudentClass>> filterClasses(@RequestParam(required = false) String className,
+                                                            @RequestParam(required = false) Integer totalStudents) {
+        Specification<StudentClass> spec = (root, query, cb) -> {
+            Specification<StudentClass> tempSpec = Specification.where(null);
+            if (className != null) {
+                tempSpec = tempSpec.and((root1, query1, cb1) -> cb1.like(root1.get("className"), "%" + className + "%"));
+            }
+            if (totalStudents != null) {
+                tempSpec = tempSpec.and((root1, query1, cb1) -> cb1.equal(root1.get("totalStudents"), totalStudents));
+            }
+            return tempSpec.toPredicate(root, query, cb);
+        };
+        return ResponseEntity.ok(classService.filterClasses(spec));
+    }
 
 
     @PutMapping("/update/{id}")

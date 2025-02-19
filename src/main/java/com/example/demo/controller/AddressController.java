@@ -3,6 +3,7 @@ package com.example.demo.controller;
 import com.example.demo.entity.Address;
 import com.example.demo.service.AddressService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +23,25 @@ public class AddressController {
     public ResponseEntity<List<Address>> getAllAddresses() {
         return ResponseEntity.ok(addressService.getAllAddresses());
     }
-
+    @GetMapping("/filter")
+    public ResponseEntity<List<Address>> filterAddresses(@RequestParam(required = false) String streetName,
+                                                         @RequestParam(required = false) String district,
+                                                         @RequestParam(required = false) String province) {
+        Specification<Address> spec = (root, query, cb) -> {
+            Specification<Address> tempSpec = Specification.where(null);
+            if (streetName != null) {
+                tempSpec = tempSpec.and((root1, query1, cb1) -> cb1.like(root1.get("streetName"), "%" + streetName + "%"));
+            }
+            if (district != null) {
+                tempSpec = tempSpec.and((root1, query1, cb1) -> cb1.like(root1.get("district"), "%" + district + "%"));
+            }
+            if (province != null) {
+                tempSpec = tempSpec.and((root1, query1, cb1) -> cb1.like(root1.get("province"), "%" + province + "%"));
+            }
+            return tempSpec.toPredicate(root, query, cb);
+        };
+        return ResponseEntity.ok(addressService.filterAddresses(spec));
+    }
     // Lấy thông tin địa chỉ theo ID
     @GetMapping("/{id}")
     public ResponseEntity<Address> getAddressById(@PathVariable Integer id) {
